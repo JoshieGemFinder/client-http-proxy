@@ -3,7 +3,7 @@ const clientProxy = require('./../index'),
 
 (async function() {
     
-    let cert = (await clientProxy.certificateHelper.quickGenerate());
+    let cert = (await clientProxy.certificateHelper.quickLoad());
     
     let server = clientProxy.createRawServer(cert.buffers, function(req, res) {
         let parsed = url.parse(req.url)

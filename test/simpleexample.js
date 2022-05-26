@@ -4,7 +4,7 @@ const clientProxy = require('./../index'),
 
 (async function() {
     
-    let cert = (await clientProxy.certificateHelper.quickGenerate());
+    let cert = (await clientProxy.certificateHelper.quickLoad());
     
     let server = clientProxy.createServer(cert.buffers);
     

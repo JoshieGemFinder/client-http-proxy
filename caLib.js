@@ -1,5 +1,8 @@
-const forge = require('node-forge')
-const crypto = require('crypto')
+const forge = require('node-forge'),
+      path = require('path'),
+      fs = require('fs'), 
+      crypto = require('crypto');
+
 const pki = forge.pki
 
 //using a blank options is perfectly fine here
@@ -36,14 +39,19 @@ async function genCACert(options = {}) {
             key: pki.privateKeyToPem(keyPair.privateKey),
             cert: pki.certificateToPem(cert)
         },
-        fingerprint: forge.util.encode64(
-            pki.getPublicKeyFingerprint(keyPair.publicKey, {
-                type: 'SubjectPublicKeyInfo',
-                md: forge.md.sha256.create(),
-                encoding: 'binary'
-            })
-        )
+        fingerprint: getFingerprint(keyPair.publicKey),
+        publicKey: pki.publicKeyToPem(keyPair.publicKey)
     }
+}
+
+function getFingerprint(publicKey) {
+    return forge.util.encode64(
+        pki.getPublicKeyFingerprint(publicKey, {
+            type: 'SubjectPublicKeyInfo',
+            md: forge.md.sha256.create(),
+            encoding: 'binary'
+        })
+    );
 }
 
 //you need to put the output from genCACert() through this if you want to use it for a https server
@@ -62,4 +70,51 @@ function caToBuffer(ca) {
     }
 }
 
-module.exports = {genCACert, caToBuffer}
+async function loadOrCreateCertificate(options={}) {
+    let dir = path.dirname(require.main.filename)
+    options = {...{
+        folder: './certificate',
+        generateOptions: {},
+        certName: 'certificate.pem',
+        keyName: 'key.pem',
+        pubKeyName: 'pubkey.pem'
+    }, ...options}
+    
+    let folder = path.resolve(dir, options.folder)
+    let certpath = path.join(folder, options.certName)
+    let keypath = path.join(folder, options.keyName)
+    let pubkeypath = path.join(folder, options.pubKeyName)
+    
+    if(fs.existsSync(certpath) && fs.existsSync(keypath) && fs.existsSync(pubkeypath)) {
+        let cert = fs.readFileSync(certpath, {encoding: 'UTF-8'}).toString('UTF-8')
+        let key = fs.readFileSync(keypath, {encoding: 'UTF-8'}).toString('UTF-8')
+        let pubkey = fs.readFileSync(pubkeypath, {encoding: 'UTF-8'}).toString('UTF-8')
+        return {
+            ca: {
+                key: key,
+                cert: cert
+            },
+            fingerprint: getFingerprint(pki.publicKeyFromPem(pubkey)),
+            publicKey: pubkey
+        }
+    } else {
+        let cert = await genCACert(options.generateOptions)
+        try {
+            if(!fs.existsSync(folder)) {
+                fs.mkdirSync(folder)
+            }
+            fs.accessSync(folder)
+            !fs.existsSync(certpath) || fs.accessSync(certpath)
+            !fs.existsSync(keypath) || fs.accessSync(keypath)
+            !fs.existsSync(pubkeypath) || fs.accessSync(pubkeypath)
+            fs.writeFileSync(certpath, cert.ca.cert)
+            fs.writeFileSync(keypath, cert.ca.key)
+            fs.writeFileSync(pubkeypath, cert.publicKey)
+        } catch(e) {
+            console.log('An error occurred while trying to save the certificates! Do you have write permissions?')
+        }
+        return cert
+    }
+}
+
+module.exports = {genCACert, caToBuffer, loadOrCreateCertificate}

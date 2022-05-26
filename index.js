@@ -13,8 +13,17 @@ const certificateHelper = {
     genCACert: caLib.genCACert,
     getCertificateBuffers: caLib.caToBuffer,
     caToBuffer: caLib.caToBuffer,
-    quickGenerate: async function quickGenerate() {
-        let certificate = (await caLib.genCACert());
+    loadOrCreateCertificate: caLib.loadOrCreateCertificate,
+    quickGenerate: async function quickGenerate(options = {}) {
+        let certificate = (await caLib.genCACert(options));
+        let buffers = caLib.caToBuffer(certificate.ca);
+        return {
+            buffers,
+            certificate
+        };
+    },
+    quickLoad: async function quickGenerate(options = {}) {
+        let certificate = (await caLib.loadOrCreateCertificate(options));
         let buffers = caLib.caToBuffer(certificate.ca);
         return {
             buffers,
@@ -86,8 +95,10 @@ function createMultiServer(options, listener) {
 function passThroughRequest(req, res) {
     let URL = fancyParser.url.fromIncomingMessage(req)
     let options = {
+        rejectUnauthorized: false,
         method: req.method,
-        headers: req.headers
+        headers: req.headers,
+        agent: false
     }
     options = {...url.urlToHttpOptions(URL), ...options}
     let lib = http
@@ -98,9 +109,10 @@ function passThroughRequest(req, res) {
         res.writeHead(response.statusCode, response.headers)
         response.pipe(res, {end: true})
     })
+    
     req.pipe(request, {end: true});
     
-    req.on('abort', () => {request.abort()})
+    req.on('aborted', () => {req.unpipe(request); request.abort()})
     
     req.on('error', e => {
         if(e.message.includes('ECONNRESET')) {
@@ -115,12 +127,14 @@ function passThroughRequest(req, res) {
     request.on('error', e => {
         if(e.message.includes('ECONNRESET')) {
             console.log('Server unexpectedly closed the passThrough request! (' + req.url + ')')
+        } else if(e.message.includes('ETIMEDOUT')) {
+            console.log('Request Timed Out! (' + req.url + ')')
         } else {
             console.log('An unexpected error occurred during passThrough! It came from the server.')
             console.log('This shouldn\'t happen, did your request close abruptly?')
             console.log(e)
         }
-        if(!res.socket.destroyed) { res.end() }
+        if(!res.socket.destroyed) { res.socket.destroy() }
     })
 }
 
@@ -172,3 +186,5 @@ exports.createServer = function createServer(options, relativeListener) {
 exports.rules = rules
 
 exports.certificateHelper = certificateHelper;
+
+exports.fancyParser = fancyParser

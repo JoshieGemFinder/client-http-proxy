@@ -1,4 +1,5 @@
-const fancyParser = require('./fancyParser')
+const clientProxy = require('./index'),
+      fancyParser = require('./fancyParser');
 
 class Rule {
     
@@ -67,7 +68,6 @@ class MatchRule extends Rule {
                     }
                     regex += char
                 }
-                console.log(match, regex)
                 this.#matchRules.push(new RegExp(regex))
             } else {
                 this.#matchRules.push(match)
@@ -145,7 +145,7 @@ class RedirectRule extends RawRule {
                 res.writeHead(307, {'Location': newUrl})
                 res.end()
             } else {
-                passThroughRequest(req, res)
+                clientProxy.passThroughRequest(req, res)
             }
         })
         this.addMatches(matches)
