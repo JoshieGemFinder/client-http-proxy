@@ -86,11 +86,11 @@ const clientProxy = require('client-proxy-server'),
 Arguments:
 * `options` \<Object\>
     * `folder` \<String\>: The folder to look for (and save to, if neccessary) the certificate PEM files. (Default: `'./certificate'`)
-    * `generateOptions` \<Object\>: The options to generate a new certificate, if none is found. (See [`generateCACertificate(\[options\])`](#certificatehelpergeneratecacertificateoptions))
+    * `generateOptions` \<Object\>: The options to generate a new certificate, if none is found. (See [`generateCACertificate([options])`](#certificatehelpergeneratecacertificateoptions))
     * `certName` \<String\>: The name of the certificate PEM file. (Default: `'certificate.pem'`)
     * `keyName` \<String\>: The name of the private key's PEM file. (Default: `'key.pem'`)
     * `pubKeyName` \<String\>: The name of the public key's PEM file. (Default: `'pubkey.pem'`)
-Returns: \<Object\> (See [`generateCACertificate(\[options\])`](#certificatehelpergeneratecacertificateoptions))
+Returns: \<Object\> (See [`generateCACertificate([options])`](#certificatehelpergeneratecacertificateoptions))
 
 This will try to locate the files specified by `certName`, `keyName`, and `pubKeyName` at the specified folder, if they aren't found, it will generate a new certificate and save it there, this can be used to load your own certificates (that maybe are trusted, so you don't have to whitelist a self-signed one), but putting the relevant files in the folder.
 
@@ -117,10 +117,10 @@ const clientProxy = require('client-proxy-server'),
 ***WARNING: `async` function! Use `await` to get the return value!***
 
 Arguments:
-* `options` \<Object\>: (See [`generateCACertificate(\[options\])`](#certificatehelpergeneratecacertificateoptions))
+* `options` \<Object\>: (See [`generateCACertificate([options])`](#certificatehelpergeneratecacertificateoptions))
 
 Returns: \<Object\>
-    * `certificate` \<Object\>: (See [`generateCACertificate(\[options\])`](#certificatehelpergeneratecacertificateoptions))
+    * `certificate` \<Object\>: (See [`generateCACertificate([options])`](#certificatehelpergeneratecacertificateoptions))
     * `buffers` \<Object\>: (See [`getCertificateBuffers(ca)`](#certificatehelpergetcertificatebuffersca))
 
 A simple wrapper for `generateCACertificate` and `getCertificateBuffers`, that automatically does them both for you
@@ -146,10 +146,10 @@ const clientProxy = require('client-proxy-server'),
 ***WARNING: `async` function! Use `await` to get the return value!***
 
 Arguments:
-* `options` \<Object\>: (See [`loadOrCreateCertificate(\[options\])`](#certificatehelperloadorcreatecertificateoptions))
+* `options` \<Object\>: (See [`loadOrCreateCertificate([options])`](#certificatehelperloadorcreatecertificateoptions))
 
 Returns: \<Object\>
-    * `certificate` \<Object\>: (See [`generateCACertificate(\[options\])`](#certificatehelpergeneratecacertificateoptions))
+    * `certificate` \<Object\>: (See [`generateCACertificate([options])`](#certificatehelpergeneratecacertificateoptions))
     * `buffers` \<Object\>: (See [`getCertificateBuffers(ca)`](#certificatehelpergetcertificatebuffersca))
 
 A simple wrapper for `loadOrCreateCertificate` and `getCertificateBuffers`, that automatically does them both for you, loading any pre-stored certificates or storing one if there is none
