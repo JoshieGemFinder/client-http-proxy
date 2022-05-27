@@ -24,7 +24,8 @@ Arguments:
 * `options` \<Object\>  
     * `commonName` \<string\>: the name of the certificate. (Default: `"Client Proxy Testing CA - DO NOT TRUST"`)  
     * `bits` \<int\>: the number of bits in the certificate. (Default: `2048`)  
-Returns: \<Object\>  
+
+* Returns: \<Object\>  
     * `ca` \<Object\>  
     * `cert` \<string\>: the certificate's PEM  
     * `key` \<string\>: the certificate private key's PEM  
@@ -55,8 +56,9 @@ const clientProxy = require('client-proxy-server'),
 Arguments:  
 * `ca` \<Object\>: the certificate data to create buffers from  
     * `cert` \<string\>: the certificate's PEM to convert to a buffer  
-    * `key` \<string\>: the certificate private key's PEM to convert to a buffer  
-Returns: \<Object\>  
+    * `key` \<string\>: the certificate private key's PEM to convert to a buffer 
+ 
+* Returns: \<Object\>  
     * `cert` \<Buffer\>: the buffer of the certificate PEM  
     * `key` \<Buffer\>: the buffer of the certificate's private key  
   
@@ -90,6 +92,7 @@ Arguments:
     * `certName` \<String\>: The name of the certificate PEM file. (Default: `'certificate.pem'`)  
     * `keyName` \<String\>: The name of the private key's PEM file. (Default: `'key.pem'`)  
     * `pubKeyName` \<String\>: The name of the public key's PEM file. (Default: `'pubkey.pem'`)  
+
 Returns: \<Object\> (See [`generateCACertificate([options])`](#certificatehelpergeneratecacertificateoptions))  
   
 This will try to locate the files specified by `certName`, `keyName`, and `pubKeyName` at the specified folder, if they aren't found, it will generate a new certificate and save it there, this can be used to load your own certificates (that maybe are trusted, so you don't have to whitelist a self-signed one), but putting the relevant files in the folder.  
@@ -119,7 +122,7 @@ const clientProxy = require('client-proxy-server'),
 Arguments:  
 * `options` \<Object\>: (See [`generateCACertificate([options])`](#certificatehelpergeneratecacertificateoptions))  
   
-Returns: \<Object\>  
+* Returns: \<Object\>  
     * `certificate` \<Object\>: (See [`generateCACertificate([options])`](#certificatehelpergeneratecacertificateoptions))  
     * `buffers` \<Object\>: (See [`getCertificateBuffers(ca)`](#certificatehelpergetcertificatebuffersca))  
   
@@ -148,7 +151,7 @@ const clientProxy = require('client-proxy-server'),
 Arguments:  
 * `options` \<Object\>: (See [`loadOrCreateCertificate([options])`](#certificatehelperloadorcreatecertificateoptions))  
   
-Returns: \<Object\>  
+* Returns: \<Object\>  
     * `certificate` \<Object\>: (See [`generateCACertificate([options])`](#certificatehelpergeneratecacertificateoptions))  
     * `buffers` \<Object\>: (See [`getCertificateBuffers(ca)`](#certificatehelpergetcertificatebuffersca))  
   
