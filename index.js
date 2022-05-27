@@ -179,7 +179,8 @@ exports.createServer = function createServer(options, relativeListener) {
         listen: server.listen.bind(server),
         addRule: (rule) => { rules.push(rule) },
         get host() { return server.host },
-        get port() { return server.port }
+        get port() { return server.port },
+        server: server
     };
 }
 

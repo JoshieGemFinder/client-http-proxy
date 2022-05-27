@@ -13,7 +13,8 @@
     "https",
     "client",
     "proxy",
-    "redirect"
+    "redirect",
+    "middleware"
   ],
   "dependencies": {
     "node-forge": "^1.3.1"

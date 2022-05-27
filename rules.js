@@ -17,6 +17,8 @@ class Rule {
         throw new Error('Cannot call abstract method "matches"!');
     }
     
+    
+    
     get stopProcessing() { return true; }
     
     get countsAsResponse() { return true; }
@@ -100,6 +102,7 @@ class MatchRule extends Rule {
         if(this.constructor === MatchRule) {
             throw new Error('Cannot Instantiate abstract class "MatchRule"!');
         }
+        this.addMatches(matches)
     }
 }
 
@@ -107,8 +110,8 @@ class RawRule extends MatchRule {
     
     #func;
     
-    constructor(func) {
-        super()
+    constructor(func, matches=[]) {
+        super(matches)
         if(typeof(func) == 'function') {
             this.#func = func;
         } else {
@@ -122,9 +125,8 @@ class RawRule extends MatchRule {
 }
 
 class IgnoreRule extends MatchRule {
-    constructor(matches) {
-        super()
-        this.addMatches(matches)
+    constructor(matches=[]) {
+        super(matches)
     }
     
     get countsAsResponse() { return false; }
@@ -133,7 +135,7 @@ class IgnoreRule extends MatchRule {
 }
 
 class RedirectRule extends RawRule {
-    constructor(location, matches) {
+    constructor(location, matches=[]) {
         super(function(req, res) {
             let newUrl = null
             if(typeof(location) == 'string') {
@@ -147,17 +149,19 @@ class RedirectRule extends RawRule {
             } else {
                 clientProxy.passThroughRequest(req, res)
             }
-        })
-        this.addMatches(matches)
+        }, matches)
     }
 }
 
 class SkippableRule extends RawRule {
     
+    #stopProcessing;
     #countsAsResponse;
     
     constructor() {
         super(...arguments)
+        this.#countsAsResponse = true;
+        this.#stopProcessing = true;
     }
     
     get countsAsResponse() { return this.#countsAsResponse; }
@@ -172,10 +176,25 @@ class SkippableRule extends RawRule {
         this.#countsAsResponse = countsAsResponse;
         return this;
     }
+    
+    
+    
+    get stopProcessing() { return this.#stopProcessing; }
+    
+    set stopProcessing(stopProcessing) {
+        this.#stopProcessing = stopProcessing;
+    }
+    
+    getStopProcessing() { return this.#stopProcessing; }
+    
+    setStopProcessing(stopProcessing) {
+        this.#stopProcessing = stopProcessing;
+        return this;
+    }
 }
 
 class RewriteRule extends SkippableRule {
-    constructor(location, matches) {
+    constructor(location, matches=[]) {
         super(function(req, res) {
             let newUrl = null
             if(typeof(location) == 'string') {
@@ -192,9 +211,8 @@ class RewriteRule extends SkippableRule {
                     req.headers.host = fancyParser.toLowerCase(now.host)
                 }
             }
-        })
+        }, matches)
         this.setCountsAsResponse(false);
-        this.addMatches(matches)
     }
 }
 
