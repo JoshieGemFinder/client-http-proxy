@@ -1,4 +1,4 @@
 node_modules/*
 test/certificate/*
 test/proxy.js
-client-http-proxy.zip
+publish/*
