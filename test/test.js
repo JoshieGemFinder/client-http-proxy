@@ -3,8 +3,9 @@ const clientProxy = require('./../index'),
 
 (async function() {
     
+    //create (or load) a certificate
     let cert = (await clientProxy.certificateHelper.quickLoad());
-    
+    //start a raw server, with the specified listener
     let server = clientProxy.createRawServer(cert.buffers, function(req, res) {
         let parsed = url.parse(req.url)
         if(server.isChildUrl(req.url)) {
@@ -17,6 +18,7 @@ const clientProxy = require('./../index'),
             res.end(req.url);
         }
     });
+    //listen on port 8005, log fingerprint
     server.listen(8005, () => {
         console.log(`Listening on ${server.host}:${server.port}`)
         console.log("Fingerprint: " + cert.certificate.fingerprint)
