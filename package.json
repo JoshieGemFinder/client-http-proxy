@@ -16,6 +16,7 @@
     "redirect",
     "middleware"
   ],
+  "homepage": "https://github.com/JoshieGemFinder/client-http-proxy#readme",
   "files": [
     "caLib.js",
     "fancyParser.js",
