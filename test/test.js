@@ -1,4 +1,4 @@
-const clientProxy = require('./../index'),
+const clientProxy = require('client-http-proxy'),
       url = require('url');
 
 (async function() {
