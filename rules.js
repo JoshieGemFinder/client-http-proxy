@@ -97,7 +97,7 @@ class MatchRule extends Rule {
         return false;
     }
     
-    constructor() {
+    constructor(matches) {
         super()
         if(this.constructor === MatchRule) {
             throw new Error('Cannot Instantiate abstract class "MatchRule"!');
