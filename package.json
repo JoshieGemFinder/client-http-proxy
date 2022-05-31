@@ -1,6 +1,6 @@
 {
   "name": "client-http-proxy",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "A http proxy that runs on your client!",
   "main": "index.js",
   "scripts": {
