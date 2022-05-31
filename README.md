@@ -245,6 +245,8 @@ These are simple to work with and create, and are highly modular, although they 
   
 Rule Servers function a bit like Raw Servers, although you don't have to do as complex of coding (not that it was really that complex anyways)  
   
+A rule server is created through `clientHttpProxy.createServer(options[, listener])`, the `options` argument is the same as `https.createServer`'s `options` argument, but it also takes a `listener`, which is a normal http listener, for when your website is accessed like a normal website would be.  
+  
 They function through Rules, there are three 'predefined' rules, and two 'raw' rules, the raw rules can be extended in their own classes if you want, and should be used if you want to do something specific, the predefined rules are built-in and shouldn't be extended, as their functions cannot be easily influenced.  
   
 Rules can be accessed through the `clientHttpProxy.rules` object, in their class forms, and can be instantated with either the `new` keyword, or their `.create` methods, both of which have the same arguments.  

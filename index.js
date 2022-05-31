@@ -175,13 +175,20 @@ exports.createServer = function createServer(options, relativeListener) {
         }
     });
     
-    return {
-        listen: server.listen.bind(server),
+    return new Proxy({
         addRule: (rule) => { rules.push(rule) },
-        get host() { return server.host },
-        get port() { return server.port },
         server: server
-    };
+    }, {
+        get(obj, key) {
+            if(key in obj) {
+                return Reflect.get(obj, key)
+            }
+            return Reflect.get(server, key)
+        },
+        set(obj, key, value) {
+            return Reflect.set(server, key, value)
+        }
+    });
 }
 
 exports.rules = rules
