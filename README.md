@@ -36,14 +36,14 @@ Creates a self-signed certificate with the specified name and bits, pass the ret
   
 #### Example  
 ```  
-const clientProxy = require('client-proxy-server'),  
+const clientHttpProxy = require('client-proxy-server'),  
       https = require('https');  
   
 //async for a top-level await  
 (async function() {  
     //create the cert  
-    let cert = await clientProxy.certificateHelper.generateCACertificate();  
-    let options = clientProxy.certificateHelper.getCertificateBuffers(cert.ca);  
+    let cert = await clientHttpProxy.certificateHelper.generateCACertificate();  
+    let options = clientHttpProxy.certificateHelper.getCertificateBuffers(cert.ca);  
     let server = https.createServer(options, (req, res) => {  
         res.end("Hello, World!");  
     });  
@@ -66,14 +66,14 @@ Used to create the buffers required for `https.createServer`'s `options`
   
 #### Example  
 ```  
-const clientProxy = require('client-proxy-server'),  
+const clientHttpProxy = require('client-proxy-server'),  
       https = require('https');  
   
 //async for a top-level await  
 (async function() {  
     //create the cert  
-    let cert = await clientProxy.certificateHelper.generateCACertificate();  
-    let options = clientProxy.certificateHelper.getCertificateBuffers(cert.ca);  
+    let cert = await clientHttpProxy.certificateHelper.generateCACertificate();  
+    let options = clientHttpProxy.certificateHelper.getCertificateBuffers(cert.ca);  
     let server = https.createServer(options, (req, res) => {  
         res.end("Hello, World!");  
     });  
@@ -100,14 +100,14 @@ This will try to locate the files specified by `certName`, `keyName`, and `pubKe
   
 #### Example  
 ```  
-const clientProxy = require('client-proxy-server'),  
+const clientHttpProxy = require('client-proxy-server'),  
       https = require('https');  
   
 //async for a top-level await  
 (async function() {  
     //create the cert  
-    let cert = await clientProxy.certificateHelper.loadOrCreateCertificate();  
-    let options = clientProxy.certificateHelper.getCertificateBuffers(cert.ca);  
+    let cert = await clientHttpProxy.certificateHelper.loadOrCreateCertificate();  
+    let options = clientHttpProxy.certificateHelper.getCertificateBuffers(cert.ca);  
     let server = https.createServer(options, (req, res) => {  
         res.end("Hello, World!");  
     });  
@@ -130,13 +130,13 @@ A simple wrapper for `generateCACertificate` and `getCertificateBuffers`, that a
   
 #### Example  
 ```  
-const clientProxy = require('client-proxy-server'),  
+const clientHttpProxy = require('client-proxy-server'),  
       https = require('https');  
   
 //async for a top-level await  
 (async function() {  
     //create the cert  
-    let cert = await certificateHelper.quickGenerate();  
+    let cert = await clientHttpProxy.certificateHelper.quickGenerate();  
     let server = https.createServer(cert.buffers, (req, res) => {  
         res.end("Hello, World!");  
     });  
@@ -160,13 +160,13 @@ A simple wrapper for `loadOrCreateCertificate` and `getCertificateBuffers`, that
   
 #### Example  
 ```  
-const clientProxy = require('client-proxy-server'),  
+const clientHttpProxy = require('client-proxy-server'),  
       https = require('https');  
   
 //async for a top-level await  
 (async function() {  
     //create the cert  
-    let cert = await certificateHelper.quickLoad();  
+    let cert = await clientHttpProxy.certificateHelper.quickLoad();  
     let server = https.createServer(cert.buffers, (req, res) => {  
         res.end("Hello, World!");  
     });  
@@ -273,18 +273,18 @@ The two raw rules are:
 #### Example  
   
 ```  
-const clientProxy = require('client-http-proxy'),  
-      rules = clientProxy.rules,  
-      url = clientProxy.fancyParser.url;  
+const clientHttpProxy = require('client-http-proxy'),  
+      rules = clientHttpProxy.rules,  
+      url = clientHttpProxy.fancyParser.url;  
   
 //async for top-level await  
 (async function() {  
   
     //get certificate  
-    let cert = await clientProxy.certificateHelper.quickLoad();  
+    let cert = await clientHttpProxy.certificateHelper.quickLoad();  
   
     //make server  
-    let server = clientProxy.createServer(cert.buffers);  
+    let server = clientHttpProxy.createServer(cert.buffers);  
   
     //if you go to 'redirect.me.to', you get redirected to example.com  
     server.addRule(rules.RedirectRule.create('https://example.com/').addMatch(function(URL, req) {  
