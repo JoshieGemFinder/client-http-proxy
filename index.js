@@ -34,6 +34,27 @@ const certificateHelper = {
 
 process.env['NODE_TLS_REJECT_UNAUTHORIZED'] = 0
 
+function generateTextRes(line, headers) {
+    let out = line + '\r\n'
+    let keys = Object.keys(headers)
+    let outhead = []
+    for(let header of keys) {
+        let val = headers[header]
+        if(!Array.isArray(val)) {
+            outhead.push(header + ': ' + val) 
+        } else {
+            for(let v of val) {
+                outhead.push(header + ': ' + v)
+            }
+        }
+    }
+    return out + outhead.join('\r\n') + '\r\n\r\n'
+}
+
+function generateTextResponse(res) {
+    return generateTextRes('HTTP/' + res.httpVersion + ' ' + res.statusCode + ' ' + res.statusMessage, res.headers)
+}
+
 function createMultiServer(options, listener) {
     
     if(typeof(options) == 'function') {
@@ -47,18 +68,7 @@ function createMultiServer(options, listener) {
     }
     
     let server = multiserver.createServer(options, function(req, res) {
-        /*let URL = url.parse(req.url)
-        URL.protocol = URL.protocol || (((req.socket.encrypted != undefined && req.socket.encrypted == true) || (req.socket.encrypted == undefined && req.socket.localPort == 443)) ? 'https:' : 'http:')
-        if(URL.host == null) {
-            let host = req.headers.host
-            let splithost = host.indexOf(':') != -1 ? host.split(':') : [host, protocolHelper.strip(URL.protocol) == 'http' ? 80 : 443]
-            URL.host = splithost.join(':')
-            URL.hostname = URL.hostname || splithost[0]
-            URL.port = URL.port || splithost[1]
-        }
-        URL.port = URL.port || protocolHelper.strip(URL.protocol) == 'http' ? 80 : 443
-        URL.host = URL.host.indexOf(':') != -1 ? URL.host : URL.host + ':' + URL.port.toString()*/
-        req.url = fancyParser.url.format(fancyParser.url.fromIncomingMessage(req))//url.format(URL)
+        req.url = fancyParser.url.format(fancyParser.url.fromIncomingMessage(req))
         listener(req, res)
     })
     
@@ -86,6 +96,79 @@ function createMultiServer(options, listener) {
             console.log("CONNECT error")
             console.log(e)
             if(socket && !socket.destroyed) { socket.end() }
+        }
+    })
+    
+    server.on('upgrade', (req, socket, head) => {
+        let URL = fancyParser.url.fromIncomingMessage(req)
+        let headers = req.headers
+        if(typeof(headers.connection) == 'string' && headers.connection.toLowerCase() == 'upgrade') {
+            let upgrade = typeof(headers.upgrade) == 'string' ? headers.upgrade : null
+            if(upgrade != null) {
+                if(upgrade.toLowerCase() == 'websocket') {
+                    //remove timeout and stuff
+                    socket.setTimeout(0)
+                    socket.setNoDelay(true)
+                    socket.setKeepAlive(true, 0)
+                    
+                    //if a head packet has been sent, put it back at the start of the socket stream, so it can be read again
+                    if(head != null && head.length > 0) { socket.unshift(head) }
+                    
+                    //get the port
+                    let lib = (URL.encrypted ? https : http)
+                    
+                    let options = {...fancyParser.url.urlToHttpOptions(URL), ...{
+                        method: req.method,
+                        headers
+                    }}
+                    
+                    //remove the protocol to avoid errors
+                    delete options.protocol
+                    
+                    let request = lib.request(options, (res) => {
+                        if(!res.upgrade) {
+                            //if it isn't going to be upgraded, stop acting like a websocket and start acting like a normal http(s) request
+                            socket.write(generateTextResponse(res));
+                            res.pipe(socket);
+                        }
+                    })
+                    
+                    request.on('upgrade', function(res, resSocket, resHead) {
+                        
+                        //same as before
+                        resSocket.setTimeout(0)
+                        resSocket.setNoDelay(true)
+                        resSocket.setKeepAlive(true, 0)
+                        
+                        request.on('error', function(e) {
+                            if(!socket.destroyed) { socket.destroy() }
+                        })
+                        
+                        socket.on('error', function (e) {
+                            resSocket.end();
+                        })
+                        
+                        //same as before
+                        if(resHead != null && resHead.length > 0) { resSocket.unshift(resHead) }
+                        
+                        //write the successful websocket upgrade text
+                        socket.write(generateTextRes('HTTP/1.1 101 Switching Protocols', res.headers));
+                        
+                        //pipe it through
+                        resSocket.pipe(socket)
+                        socket.pipe(resSocket)
+                    })
+                    
+                    //actually send the request
+                    request.end()
+                } else {
+                    socket.end()
+                }
+            } else {
+                socket.end()
+            }
+        } else {
+            socket.end()
         }
     })
     

@@ -43,7 +43,7 @@ const fancyParser = {}
 const fancyUrl = new Proxy({
     fromIncomingMessage: function fromIncomingMessage(req, ...options) {
         let parsed = url.parse(req.url, ...options)
-        let https = req.socket.encrypted == true || parsed.protocol == 'https:'
+        let https = req.socket.encrypted == true || parsed.protocol == 'https:' || (parsed.port != null ? parsed.port == 443 : (parsed.host != null && parsed.host.indexOf(':') ? parsed.host.substring(parsed.host.indexOf(':') + 1) == 443 : false))
         let defaultProtocol = https ? 'https:' : 'http:'
         let defaultPort = https ? '443' : '80'
         
@@ -54,6 +54,7 @@ const fancyUrl = new Proxy({
         parsed.slashes = true
         parsed.hostname = parsed.hostname || splitHost[0]
         parsed.port = parsed.port || splitHost[1]
+        parsed.encrypted = https
         
         if(parsed.host == null || (parsed.host.indexOf(':') == -1 && parsed.host == splitHost[0])) {
             if(splitHost[1] == defaultPort) {

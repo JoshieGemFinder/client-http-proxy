@@ -9,7 +9,8 @@ const pki = forge.pki
 async function genCACert(options = {}) {
     options = {...{
         commonName: 'Client Proxy Testing CA - DO NOT TRUST',
-        bits: 2048
+        bits: 2048,
+        SAN: []
     }, ...options}
     
     let keyPair = await new Promise((res, rej) => {
@@ -28,8 +29,40 @@ async function genCACert(options = {}) {
     cert.validity.notAfter = new Date()
     cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear() + 1)
     
+    let extensions = [{ name: 'basicConstraints', cA: true }]
+    
+    if(options.SAN instanceof Array && options.SAN.length > 0) {
+        let sanExtension = {name: 'subjectAltName', altNames: []}
+        let SAN = options.SAN
+        let altNames = sanExtension.altNames
+        
+        for(let name of SAN) {
+            if(typeof(name) == 'string') {
+                let type = 2
+                //if is ip address
+                let ipmatch = name.match(/\b\d{1,3}\.\d{1,3}\.\d{1,3}.\d{1,3}\b/)
+                if(ipmatch != null) {
+                    name = ipmatch[0]
+                    type = 7
+                }
+                let extension = {type}
+                switch(type) {
+                    case 7:
+                        extension.ip = name;
+                        break;
+                    default: 
+                        extension.value = name;
+                        break;
+                }
+                altNames.push(extension)
+            }
+        }
+        
+        extensions.push(sanExtension)
+    }
+    
     cert.setSubject([{name: 'commonName', value: options.commonName}])
-    cert.setExtensions([{ name: 'basicConstraints', cA: true }])
+    cert.setExtensions(extensions)
     
     cert.setIssuer(cert.subject.attributes)
     cert.sign(keyPair.privateKey, forge.md.sha256.create())
